@@ -584,6 +584,9 @@ export abstract class AbstractTaskService extends Disposable implements ITaskSer
 
 	public async tryResolveTask(configuringTask: ConfiguringTask): Promise<Task | undefined> {
 		await Promise.all([this.extensionService.activateByEvent('onCommand:workbench.action.tasks.runTask'), this.extensionService.whenInstalledExtensionsRegistered()]);
+		if (configuringTask.type) {
+			await Promise.all([this.extensionService.activateByEvent(`onTaskResolve:${configuringTask.type}`), this.extensionService.whenInstalledExtensionsRegistered()]);
+		}
 		let matchingProvider: ITaskProvider | undefined;
 		let matchingProviderUnavailable: boolean = false;
 		for (const [handle, provider] of this._providers) {
@@ -1633,12 +1636,19 @@ export abstract class AbstractTaskService extends Disposable implements ITaskSer
 
 	private getGroupedTasks(type?: string): Promise<TaskMap> {
 		const needsRecentTasksMigration = this.needsRecentTasksMigration();
+		const isProvideTasksEnabled = this.isProvideTasksEnabled();
 		return Promise.all([this.extensionService.activateByEvent('onCommand:workbench.action.tasks.runTask'), this.extensionService.whenInstalledExtensionsRegistered()]).then(() => {
 			let validTypes: IStringDictionary<boolean> = Object.create(null);
-			TaskDefinitionRegistry.all().forEach(definition => validTypes[definition.taskType] = true);
 			validTypes['shell'] = true;
 			validTypes['process'] = true;
-			return new Promise<TaskSet[]>(resolve => {
+			const activationPromises: Promise<void>[] = [];
+			TaskDefinitionRegistry.all().forEach(({ taskType }) => {
+				validTypes[taskType] = true;
+				if (isProvideTasksEnabled && (type === undefined || type === taskType)) {
+					activationPromises.push(this.extensionService.activateByEvent(`onTaskProvide:${taskType}`));
+				}
+			});
+			return Promise.all(activationPromises).then(() => new Promise<TaskSet[]>(resolve => {
 				let result: TaskSet[] = [];
 				let counter: number = 0;
 				let done = (value: TaskSet | undefined) => {
@@ -1692,7 +1702,7 @@ export abstract class AbstractTaskService extends Disposable implements ITaskSer
 				} else {
 					resolve(result);
 				}
-			});
+			}));
 		}).then((contributedTaskSets) => {
 			let result: TaskMap = new TaskMap();
 			let contributedTasks: TaskMap = new TaskMap();

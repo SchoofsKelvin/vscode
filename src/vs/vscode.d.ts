@@ -6581,6 +6581,10 @@ declare module 'vscode' {
 		/**
 		 * Register a task provider.
 		 *
+		 * When looking for tasks, VS Code fires an `onTaskProvide:taskType` activation event.
+		 * When a task is being resolved, VS Code fires an `onTaskResolve:taskType` activation event.
+		 * Your extension can listen to these events to make sure the task provider is available.
+		 *
 		 * @param type The task kind type this provider is registered for.
 		 * @param provider A task provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
@@ -10390,6 +10394,10 @@ declare module 'vscode' {
 		 * Register a task provider.
 		 *
 		 * @deprecated Use the corresponding function on the `tasks` namespace instead
+		 *
+		 * When looking for tasks, VS Code fires an `onTaskProvide:taskType` activation event.
+		 * When a task is being resolved, VS Code fires an `onTaskResolve:taskType` activation event.
+		 * Your extension can listen to these events to make sure the task provider is available.
 		 *
 		 * @param type The task kind type this provider is registered for.
 		 * @param provider A task provider.
