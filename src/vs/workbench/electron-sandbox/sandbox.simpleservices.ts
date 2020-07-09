@@ -694,6 +694,7 @@ class SimpleTaskService implements ITaskService {
 	terminateAll(): Promise<TaskTerminateResponse[]> { throw new Error('Method not implemented.'); }
 	tasks(filter?: TaskFilter): Promise<Task[]> { throw new Error('Method not implemented.'); }
 	taskTypes(): string[] { throw new Error('Method not implemented.'); }
+	getPossibleTaskTypes(): Promise<string[]> { throw new Error('Method not implemented.'); }
 	getWorkspaceTasks(runSource?: TaskRunSource): Promise<Map<string, WorkspaceFolderTaskResult>> { throw new Error('Method not implemented.'); }
 	readRecentTasks(): Promise<(CustomTask | ContributedTask | InMemoryTask | ConfiguringTask)[]> { throw new Error('Method not implemented.'); }
 	getTask(workspaceFolder: string | IWorkspace | IWorkspaceFolder, alias: string | TaskIdentifier, compareId?: boolean): Promise<CustomTask | ContributedTask | InMemoryTask | undefined> { throw new Error('Method not implemented.'); }
